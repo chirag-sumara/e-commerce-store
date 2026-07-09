@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../component/ProductCard";
+import ProductCardSkeleton from "../component/ProductCardSkeleton";
 import { XIcon } from "lucide-react";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [loading, setLoading] = useState(true);
 
   async function getProducts() {
     let response = await fetch("https://fakestoreapi.com/products");
     let data = await response.json();
     setProducts(data);
+    setLoading(false);
   }
   useEffect(() => {
     getProducts();
@@ -20,7 +23,7 @@ const Home = () => {
     product.title.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const fillterCategory =
+  const filteredCategory =
     category === ""
       ? filteredProducts
       : filteredProducts.filter((product) => {
@@ -34,7 +37,7 @@ const Home = () => {
         <h2 className="font-light hover:font-medium mb-3 ease-in duration-75 text-2xl tracking-wide">
           Featured Products
         </h2>
-        <div className="flex justify-between items-center w-9/12">
+        <div className="flex justify-between items-center mb-5 w-9/12">
           <div className="flex gap-1">
             <button
               onClick={() => setCategory("")}
@@ -82,8 +85,17 @@ const Home = () => {
         </div>
         <div className="flex flex-wrap justify-center gap-10 w-10/12 ">
           {/* Card Lists */}
-          {fillterCategory.length > 0 ? (
-            fillterCategory.map((product) => (
+          {loading === true ? (
+            <h2 className="font-extrabold text-3xl text-red-500 flex items-center justify-center gap-3">
+              {/* <XIcon className="mt-1" size={30} strokeWidth={6} />  */}
+              <div className="flex flex-wrap justify-center gap-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            </h2>
+          ) : (
+            filteredCategory.map((product) => (
               <ProductCard
                 key={product.id}
                 title={product.title}
@@ -92,11 +104,6 @@ const Home = () => {
                 category={product.category}
               />
             ))
-          ) : (
-            <h2 className="font-extrabold text-3xl text-red-500 flex items-center justify-center gap-3">
-              <XIcon className="mt-1" size={30} strokeWidth={6} /> No Items
-              Found
-            </h2>
           )}
         </div>
       </div>
